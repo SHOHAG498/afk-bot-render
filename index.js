@@ -32,7 +32,7 @@ function createBot() {
   const bot = mineflayer.createBot({
     host: SERVER_HOST,
     port: SERVER_PORT,
-    username: 'SR_AFK_Bot_1',
+    username: 'MODERATOR 1(BY,SR)',
     version: '1.20.4'
   });
 
