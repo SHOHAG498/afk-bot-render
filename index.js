@@ -33,7 +33,7 @@ function createBot() {
     host: SERVER_HOST,
     port: SERVER_PORT,
    username: 'MOD_1_BY_SR',
-    version: false
+    version: '1.20.4',
   });
 
   bot.on('spawn', () => {
