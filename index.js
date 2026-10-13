@@ -33,9 +33,9 @@ server.listen(PORT, '0.0.0.0', () => {
 // --- ২. Minecraft Bot Config & Logic ---
 const SERVER_HOST = 'buri.aternos.host';
 const SERVER_PORT = 28337;
+const BOT_USERNAME = 'SR_AFK_BOT'; // 🎯 এই নামটি একবার হোয়াইটলিস্ট করবেন
 
 function createBot() {
-  // আগের কানেকশন থাকলে তা পুরোপুরি ডিসকানেক্ট করে দেওয়া
   if (botInstance) {
     try {
       botInstance.quit();
@@ -43,17 +43,13 @@ function createBot() {
     botInstance = null;
   }
 
-  // ডুপ্লিকেট কিক এড়াতে ইউনিক বটের নাম
-  const randomSuffix = Math.floor(100 + Math.random() * 900);
-  const botUsername = `SR_BOT_${randomSuffix}`;
-
-  console.log(`[Bot] Connecting to Minecraft server as ${botUsername}...`);
-  botStatus = `Connecting to Server as ${botUsername}...`;
+  console.log(`[Bot] Connecting to Minecraft server as ${BOT_USERNAME}...`);
+  botStatus = `Connecting to Server as ${BOT_USERNAME}...`;
 
   const bot = mineflayer.createBot({
     host: SERVER_HOST,
     port: SERVER_PORT,
-    username: botUsername,
+    username: BOT_USERNAME,
     hideErrors: false,
     checkTimeoutInterval: 60000
   });
@@ -61,8 +57,8 @@ function createBot() {
   botInstance = bot;
 
   bot.on('spawn', () => {
-    console.log(`>>> [SUCCESS] ${botUsername} joined the server! <<<`);
-    botStatus = `ONLINE (Joined as ${botUsername})`;
+    console.log(`>>> [SUCCESS] ${BOT_USERNAME} joined the server! <<<`);
+    botStatus = `ONLINE (Joined as ${BOT_USERNAME})`;
     lastJoinTime = new Date().toLocaleTimeString();
 
     // Anti-AFK Swing Arm
@@ -74,9 +70,10 @@ function createBot() {
   });
 
   bot.on('end', (reason) => {
-    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 20s...`);
-    botStatus = `Disconnected (${reason}). Reconnecting in 20s...`;
-    setTimeout(createBot, 20000);
+    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 25s...`);
+    botStatus = `Disconnected (${reason}). Reconnecting in 25s...`;
+    // ডুপ্লিকেট কানেকশন এড়াতে ২৫ সেকেন্ড পর রিকানেক্ট হবে
+    setTimeout(createBot, 25000);
   });
 
   bot.on('error', (err) => {
