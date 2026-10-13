@@ -35,21 +35,25 @@ const SERVER_HOST = 'buri.aternos.host';
 const SERVER_PORT = 28337;
 
 function createBot() {
-  // আগের যেকোনো বট কানেকশন থাকলে তা পুরোপুরি বন্ধ করে দেওয়া
+  // আগের কানেকশন থাকলে তা পুরোপুরি ডিসকানেক্ট করে দেওয়া
   if (botInstance) {
     try {
-      botInstance.end();
+      botInstance.quit();
     } catch (e) {}
     botInstance = null;
   }
 
-  console.log('[Bot] Connecting to Minecraft server...');
-  botStatus = "Connecting to Server...";
+  // ডুপ্লিকেট কিক এড়াতে ইউনিক বটের নাম
+  const randomSuffix = Math.floor(100 + Math.random() * 900);
+  const botUsername = `SR_BOT_${randomSuffix}`;
+
+  console.log(`[Bot] Connecting to Minecraft server as ${botUsername}...`);
+  botStatus = `Connecting to Server as ${botUsername}...`;
 
   const bot = mineflayer.createBot({
     host: SERVER_HOST,
     port: SERVER_PORT,
-    username: 'MOD_1_BY_SR',
+    username: botUsername,
     hideErrors: false,
     checkTimeoutInterval: 60000
   });
@@ -57,8 +61,8 @@ function createBot() {
   botInstance = bot;
 
   bot.on('spawn', () => {
-    console.log('>>> [SUCCESS] SR AFK Bot joined the server! <<<');
-    botStatus = "ONLINE (Successfully Joined Server!)";
+    console.log(`>>> [SUCCESS] ${botUsername} joined the server! <<<`);
+    botStatus = `ONLINE (Joined as ${botUsername})`;
     lastJoinTime = new Date().toLocaleTimeString();
 
     // Anti-AFK Swing Arm
@@ -70,9 +74,9 @@ function createBot() {
   });
 
   bot.on('end', (reason) => {
-    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 15s...`);
-    botStatus = `Disconnected (Reason: ${reason}). Reconnecting in 15s...`;
-    setTimeout(createBot, 15000);
+    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 20s...`);
+    botStatus = `Disconnected (${reason}). Reconnecting in 20s...`;
+    setTimeout(createBot, 20000);
   });
 
   bot.on('error', (err) => {
