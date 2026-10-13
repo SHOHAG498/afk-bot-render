@@ -1,11 +1,6 @@
 const http = require('http');
 const mineflayer = require('mineflayer');
 
-// --- বটের স্ট্যাটাস ট্র্যাক করার ভেরিয়েবল ---
-let botStatus = "Disconnected (Connecting...)";
-let lastJoinTime = "Never";
-let botInstance = null;
-
 // --- ১. HTTP Web Server (Render & Cron-job.org Monitoring) ---
 const PORT = process.env.PORT || 10000;
 
@@ -14,8 +9,6 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
       status: 'OK', 
-      bot_connection: botStatus,
-      last_joined: lastJoinTime,
       message: 'Render SR AFK Bot Active!', 
       uptime: Math.floor(process.uptime()) + ' seconds' 
     }));
@@ -29,37 +22,22 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`[HTTP Server] Bot web monitor running on port ${PORT}`);
 });
 
-
 // --- ২. Minecraft Bot Config & Logic ---
-const SERVER_HOST = 'buri.aternos.host';
+const SERVER_HOST = 'SRSHOHAG27-duKW.aternos.me';
 const SERVER_PORT = 28337;
-const BOT_USERNAME = 'SR_AFK_BOT'; // 🎯 এই নামটি একবার হোয়াইটলিস্ট করবেন
 
 function createBot() {
-  if (botInstance) {
-    try {
-      botInstance.quit();
-    } catch (e) {}
-    botInstance = null;
-  }
-
-  console.log(`[Bot] Connecting to Minecraft server as ${BOT_USERNAME}...`);
-  botStatus = `Connecting to Server as ${BOT_USERNAME}...`;
+  console.log('[Bot] Connecting to Minecraft server as SR_AFK_Bot_1...');
 
   const bot = mineflayer.createBot({
     host: SERVER_HOST,
     port: SERVER_PORT,
-    username: BOT_USERNAME,
-    hideErrors: false,
-    checkTimeoutInterval: 60000
+    username: 'SR_AFK_Bot_1',
+    version: '1.20.4'
   });
 
-  botInstance = bot;
-
   bot.on('spawn', () => {
-    console.log(`>>> [SUCCESS] ${BOT_USERNAME} joined the server! <<<`);
-    botStatus = `ONLINE (Joined as ${BOT_USERNAME})`;
-    lastJoinTime = new Date().toLocaleTimeString();
+    console.log('>>> [SUCCESS] SR_AFK_Bot_1 joined the server! <<<');
 
     // Anti-AFK Swing Arm
     setInterval(() => {
@@ -70,15 +48,12 @@ function createBot() {
   });
 
   bot.on('end', (reason) => {
-    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 25s...`);
-    botStatus = `Disconnected (${reason}). Reconnecting in 25s...`;
-    // ডুপ্লিকেট কানেকশন এড়াতে ২৫ সেকেন্ড পর রিকানেক্ট হবে
-    setTimeout(createBot, 25000);
+    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 15 seconds...`);
+    setTimeout(createBot, 15000);
   });
 
   bot.on('error', (err) => {
     console.log('[Bot Error]', err.message);
-    botStatus = `Error: ${err.message}`;
   });
 }
 
