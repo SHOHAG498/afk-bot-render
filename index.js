@@ -1,5 +1,6 @@
 const http = require('http');
 const mineflayer = require('mineflayer');
+const bedrock = require('bedrock-protocol');
 
 // --- ১. HTTP Web Server (Render & Cron-job.org Monitoring) ---
 const PORT = process.env.PORT || 10000;
@@ -9,7 +10,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
       status: 'OK', 
-      message: 'SR Dual AFK Bots Active!', 
+      message: 'SR Dual AFK Bots (Java + Bedrock) Active!', 
       uptime: Math.floor(process.uptime()) + ' seconds' 
     }));
   } else {
@@ -24,7 +25,7 @@ server.listen(PORT, '0.0.0.0', () => {
 
 
 // ==========================================
-// --- ২. JAVA SERVER BOT (Server 1) ---
+// --- ২. JAVA SERVER BOT CONFIG & LOGIC ---
 // ==========================================
 const JAVA_HOST = 'SRSHOHAG27-duKW.aternos.me';
 const JAVA_PORT = 28337;
@@ -40,7 +41,7 @@ function createJavaBot() {
   });
 
   bot.on('spawn', () => {
-    console.log('>>> [SUCCESS] Java AFK Bot joined Server 1! <<<');
+    console.log('>>> [SUCCESS] Java AFK Bot joined Java Server! <<<');
 
     setInterval(() => {
       if (bot && bot.entity) {
@@ -50,7 +51,7 @@ function createJavaBot() {
   });
 
   bot.on('end', (reason) => {
-    console.log(`[Java Bot] Disconnected: ${reason}. Reconnecting in 15s...`);
+    console.log(`[Java Bot Disconnected] Reason: ${reason}. Reconnecting in 15s...`);
     setTimeout(createJavaBot, 15000);
   });
 
@@ -60,45 +61,46 @@ function createJavaBot() {
 }
 
 
-// ==========================================
-// --- ৩. SECOND BOT (Server 2) ---
-// ==========================================
-const SERVER2_HOST = 'SRSHOHAG27.aternos.me';
-const SERVER2_PORT = 19132;
+// =============================================
+// --- ৩. BEDROCK SERVER BOT CONFIG & LOGIC ---
+// =============================================
+const BEDROCK_HOST = 'SRSHOHAG27.aternos.me'; 
+const BEDROCK_PORT = 19132;
 
-function createSecondBot() {
-  console.log('[Bot 2] Connecting to Server 2...');
+function createBedrockBot() {
+  console.log('[Bedrock Bot] Connecting to Bedrock server...');
 
-  const bot = mineflayer.createBot({
-    host: SERVER2_HOST,
-    port: SERVER2_PORT,
-    username: 'BEDROCK_AFK_SR',
-    version: false,
-  });
+  try {
+    const client = bedrock.createClient({
+      host: BEDROCK_HOST,
+      port: BEDROCK_PORT,
+      username: 'BEDROCK_AFK_SR',
+      offline: true,
+      skipPing: true,
+      concurrenyLimit: 1
+    });
 
-  bot.on('spawn', () => {
-    console.log('>>> [SUCCESS] AFK Bot 2 joined Server 2! <<<');
+    client.on('join', () => {
+      console.log('>>> [SUCCESS] Bedrock AFK Bot joined Bedrock Server! <<<');
+    });
 
-    setInterval(() => {
-      if (bot && bot.entity) {
-        bot.swingArm('right');
-      }
-    }, 20000);
-  });
+    client.on('close', () => {
+      console.log('[Bedrock Bot Disconnected] Reconnecting in 15s...');
+      setTimeout(createBedrockBot, 15000);
+    });
 
-  bot.on('end', (reason) => {
-    console.log(`[Bot 2] Disconnected: ${reason}. Reconnecting in 15s...`);
-    setTimeout(createSecondBot, 15000);
-  });
-
-  bot.on('error', (err) => {
-    console.log('[Bot 2 Error]', err.message);
-  });
+    client.on('error', (err) => {
+      console.log('[Bedrock Bot Error]', err.message);
+    });
+  } catch (e) {
+    console.log('[Bedrock Catch Error]', e.message);
+    setTimeout(createBedrockBot, 15000);
+  }
 }
 
 
 // ==========================================
-// --- ৪. SYSTEM HANDLERS & START ---
+// --- ৪. GLOBAL SYSTEM HANDLERS & START ---
 // ==========================================
 process.on('uncaughtException', (err) => {
   console.error('[System Alert] Uncaught Exception:', err.message);
@@ -110,4 +112,4 @@ process.on('unhandledRejection', (reason) => {
 
 // Start Both Bots
 createJavaBot();
-createSecondBot();
+createBedrockBot();
