@@ -75,7 +75,7 @@ function createBedrockBot() {
     host: BEDROCK_HOST,
     port: BEDROCK_PORT,
     username: 'BEDROCK_AFK_SR',
-    offline: true // Cracked mode enabled
+    offline: true
   });
 
   client.on('join', () => {
@@ -96,8 +96,6 @@ function createBedrockBot() {
 // ==========================================
 // --- ৪. GLOBAL SYSTEM HANDLERS & START ---
 // ==========================================
-process.processOn = process.on;
-
 process.on('uncaughtException', (err) => {
   console.error('[System Alert] Uncaught Exception:', err.message);
 });
@@ -106,6 +104,6 @@ process.on('unhandledRejection', (reason) => {
   console.error('[System Alert] Unhandled Rejection:', reason);
 });
 
-// Start Both Bots Simultaneously
+// Start Both Bots
 createJavaBot();
 createBedrockBot();
