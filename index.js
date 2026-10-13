@@ -1,9 +1,10 @@
 const http = require('http');
 const mineflayer = require('mineflayer');
 
-// --- বটের স্ট্যাটাস ট্র্যাক করার জন্য ---
+// --- বটের স্ট্যাটাস ট্র্যাক করার ভেরিয়েবল ---
 let botStatus = "Disconnected (Connecting...)";
 let lastJoinTime = "Never";
+let botInstance = null;
 
 // --- ১. HTTP Web Server (Render & Cron-job.org Monitoring) ---
 const PORT = process.env.PORT || 10000;
@@ -28,12 +29,20 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`[HTTP Server] Bot web monitor running on port ${PORT}`);
 });
 
+
 // --- ২. Minecraft Bot Config & Logic ---
-// 🎯 Aternos-এর আসল Dyn IP এবং Port দেওয়া হয়েছে:
 const SERVER_HOST = 'buri.aternos.host';
 const SERVER_PORT = 28337;
 
 function createBot() {
+  // আগের যেকোনো বট কানেকশন থাকলে তা পুরোপুরি বন্ধ করে দেওয়া
+  if (botInstance) {
+    try {
+      botInstance.end();
+    } catch (e) {}
+    botInstance = null;
+  }
+
   console.log('[Bot] Connecting to Minecraft server...');
   botStatus = "Connecting to Server...";
 
@@ -41,11 +50,14 @@ function createBot() {
     host: SERVER_HOST,
     port: SERVER_PORT,
     username: 'MOD_1_BY_SR',
-    checkTimeoutInterval: 60000,
+    hideErrors: false,
+    checkTimeoutInterval: 60000
   });
 
+  botInstance = bot;
+
   bot.on('spawn', () => {
-    console.log('>>> [SUCCESS] SR_AFK_Bot_1 joined the server! <<<');
+    console.log('>>> [SUCCESS] SR AFK Bot joined the server! <<<');
     botStatus = "ONLINE (Successfully Joined Server!)";
     lastJoinTime = new Date().toLocaleTimeString();
 
@@ -58,7 +70,7 @@ function createBot() {
   });
 
   bot.on('end', (reason) => {
-    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 15 seconds...`);
+    console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 15s...`);
     botStatus = `Disconnected (Reason: ${reason}). Reconnecting in 15s...`;
     setTimeout(createBot, 15000);
   });
