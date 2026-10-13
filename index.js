@@ -1,7 +1,11 @@
 const http = require('http');
 const mineflayer = require('mineflayer');
 
-// --- ১. HTTP Web Server (Render & Cron-job.org Monitoring) ---
+// --- বটের বর্তমান স্ট্যাটাস ট্র্যাক করার ভেরিয়েবল ---
+let botStatus = "Disconnected (Connecting...)";
+let lastJoinTime = "Never";
+
+// --- ১. HTTP Web Server (Render & Cron-job.org Monitoring + Bot Status) ---
 const PORT = process.env.PORT || 10000;
 
 const server = http.createServer((req, res) => {
@@ -9,6 +13,8 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
       status: 'OK', 
+      bot_connection: botStatus,
+      last_joined: lastJoinTime,
       message: 'Render SR AFK Bot Active!', 
       uptime: Math.floor(process.uptime()) + ' seconds' 
     }));
@@ -28,6 +34,7 @@ const SERVER_PORT = 28337;
 
 function createBot() {
   console.log('[Bot] Connecting to Minecraft server as SR_AFK_Bot_1...');
+  botStatus = "Connecting to Server...";
 
   const bot = mineflayer.createBot({
     host: SERVER_HOST,
@@ -38,6 +45,8 @@ function createBot() {
 
   bot.on('spawn', () => {
     console.log('>>> [SUCCESS] SR_AFK_Bot_1 joined the server! <<<');
+    botStatus = "ONLINE (Successfully Joined Server!)";
+    lastJoinTime = new Date().toLocaleTimeString();
 
     // Anti-AFK Swing Arm
     setInterval(() => {
@@ -49,11 +58,13 @@ function createBot() {
 
   bot.on('end', (reason) => {
     console.log(`[Bot Disconnected] Reason: ${reason}. Reconnecting in 15 seconds...`);
+    botStatus = `Disconnected (Reason: ${reason}). Reconnecting...`;
     setTimeout(createBot, 15000);
   });
 
   bot.on('error', (err) => {
     console.log('[Bot Error]', err.message);
+    botStatus = `Error: ${err.message}`;
   });
 }
 
